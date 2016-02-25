@@ -120,17 +120,17 @@ do_install() {
   || ( echo "Unable to create system directories" ; exit 1)
 
   # Prepare compilation directory
-  rm -fR /tmp/nagios-src
-  mkdir -p /tmp/nagios-src \
-    || (echo "Unable to create nagios source directory (all source code has been left in /tmp/nagios-src)" ; exit 1)
+  rm -fR /usr/src/nagios
+  mkdir -p /usr/src/nagios \
+    || (echo "Unable to create nagios source directory (all source code has been left in /usr/src/nagios)" ; exit 1)
 
   # Compile Nagios
-  cd /tmp/nagios-src \
+  cd /usr/src/nagios \
     && $WGET -O nagios.tar.gz https://assets.nagios.com/downloads/nagioscore/releases/nagios-${NAGIOS_VERSION}.tar.gz \
     && tar -xzf nagios.tar.gz \
     && rm nagios.tar.gz \
     && cd nagios-${NAGIOS_VERSION} \
-    || (echo "Unable to download nagios (all source code has been left in /tmp/nagios-src)" ; exit 1)
+    || (echo "Unable to download nagios (all source code has been left in /usr/src/nagios)" ; exit 1)
 
   sh configure \
     --prefix=/opt/nagios \
@@ -139,15 +139,15 @@ do_install() {
     --libexecdir=/opt/nagios/plugins \
     --with-command-group=nagioscmd \
     && make all \
-    || (echo "Unable to compile nagios (all source code has been left in /tmp/nagios-src)" ; exit 1)
+    || (echo "Unable to compile nagios (all source code has been left in /usr/src/nagios)" ; exit 1)
 
   # Compile Nagios plugins
-  cd /tmp/nagios-src \
+  cd /usr/src/nagios \
     && $WGET -O nagios-plugins.tar.gz http://www.nagios-plugins.org/download/nagios-plugins-${NAGIOS_PLUGINS_VERSION}.tar.gz \
     && tar -xzf nagios-plugins.tar.gz \
     && rm nagios-plugins.tar.gz \
     && cd nagios-plugins-${NAGIOS_PLUGINS_VERSION} \
-    || (echo "Unable to download nagios-plugins (all source code has been left in /tmp/nagios-src)" ; exit 1)
+    || (echo "Unable to download nagios-plugins (all source code has been left in /usr/src/nagios)" ; exit 1)
 
   sh configure \
     --prefix=/opt/nagios \
@@ -155,27 +155,27 @@ do_install() {
     --localstatedir=/var/nagios \
     --libexecdir=/opt/nagios/plugins \
     && make all \
-    || (echo "Unable to compile nagios-plugins (all source code has been left in /tmp/nagios-src)" ; exit 1)
+    || (echo "Unable to compile nagios-plugins (all source code has been left in /usr/src/nagios)" ; exit 1)
 
   # Install Nagios
-  cd /tmp/nagios-src/nagios-${NAGIOS_VERSION} \
+  cd /usr/src/nagios/nagios-${NAGIOS_VERSION} \
     && make install \
     && make install-commandmode \
     && make install-config \
     && make install-init \
-    || (echo "Unable to install nagios-plugins (all source code has been left in /tmp/nagios-src)" ; exit 1)
+    || (echo "Unable to install nagios-plugins (all source code has been left in /usr/src/nagios)" ; exit 1)
 
   # Install Nagios plugins
-  cd /tmp/nagios-src/nagios-plugins-${NAGIOS_PLUGINS_VERSION} \
+  cd /usr/src/nagios/nagios-plugins-${NAGIOS_PLUGINS_VERSION} \
     && make install \
-    || (echo "Unable to install nagios-plugins (all source code has been left in /tmp/nagios-src)" ; exit 1)
+    || (echo "Unable to install nagios-plugins (all source code has been left in /usr/src/nagios)" ; exit 1)
 
   # re-apply permissions
   cd / \
     && chown root:root /etc/nagios /opt/nagios \
     && chown nagios:nagios /var/nagios \
     && chmod 0755 /opt/nagios /etc/nagios \
-    || (echo "Unable to re-apply permissions (all source code has been left in /tmp/nagios-src)" ; exit 1)
+    || (echo "Unable to re-apply permissions (all source code has been left in /usr/src/nagios)" ; exit 1)
 
   for DIR in /etc/apache2 /etc/httpd ; do
     if [ -d "$DIR" ] ; then
@@ -188,7 +188,7 @@ do_install() {
   if which a2enmod >/dev/null 2>/dev/null ; then
     a2enmod cgi \
       && a2enmod auth_basic \
-      || (echo "Unable to change Apache 2 settings (all source code has been left in /tmp/nagios-src)" ; exit 1)
+      || (echo "Unable to change Apache 2 settings (all source code has been left in /usr/src/nagios)" ; exit 1)
   fi
 
   if [ "x$HTTPD_CONFIG_DIR" != "x" ] ; then
@@ -227,11 +227,11 @@ do_install() {
 EOF
       cp /dev/null /etc/nagios/htpasswd.groups \
         && htpasswd -b -c /etc/nagios/htpasswd.users nagiosadmin nagiosadmin \
-        || (echo "Unable to create htpasswd for nagios (all source code has been left in /tmp/nagios-src)" ; exit 1)
+        || (echo "Unable to create htpasswd for nagios (all source code has been left in /usr/src/nagios)" ; exit 1)
 
     if [ "x${HTTPD_CONFIG_LINK}" != "x" ] ; then
       ln -s ${HTTPD_CONFIG_FILE} ${HTTPD_CONFIG_LINK} \
-        || (echo "Unable to create Apache 2 configuration symlink (all source code has been left in /tmp/nagios-src)" ; exit 1)
+        || (echo "Unable to create Apache 2 configuration symlink (all source code has been left in /usr/src/nagios)" ; exit 1)
     fi
   else
     echo "Unable to locate Apache configuration directory - skipping web server configuration"
@@ -275,10 +275,6 @@ EOF
   else
     echo "Unable to restart Apache - you may need to restart it manually"
   fi
-
-  # cleanup
-  cd /
-  rm -fR /tmp/nagios-src
 
   IP_ADDRESS=`ifconfig 2>/dev/null|grep 'inet addr'|sed 's,^.*inet addr:,,;s, .*$,,'|grep -v '127\.0\.0\.1'|head -1`
   if [ "x$IP_ADDRESS" = "x" ] ; then
