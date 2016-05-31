@@ -46,6 +46,14 @@ do_install() {
   # Install prerequisites
   if which apt-get >/dev/null 2>/dev/null ; then
     export DEBIAN_FRONTEND=noninteractive
+
+    # detect PHP module version
+    if grep xenial /etc/lsb-release >/dev/null ; then
+      PHPMODULE=libapache2-mod-php
+    else
+      PHPMODULE=libapache2-mod-php5
+    fi
+
     apt-get update || exit 1
     apt-get -y upgrade || exit 1
     apt-get -y install wget gcc make binutils cpp \
@@ -53,7 +61,7 @@ do_install() {
       libssl1.0.0 libssl-dev pkg-config \
       libgd2-xpm-dev libgd-tools \
       perl libperl-dev libnet-snmp-perl snmp \
-      apache2 apache2-utils libapache2-mod-php5 \
+      apache2 apache2-utils $PHPMODULE \
       unzip tar gzip || exit 1
   elif yum --help >/dev/null 2>/dev/null ; then
     yum -y update || exit 1
