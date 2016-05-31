@@ -8,5 +8,5 @@ This script is meant to automate deployment of Nagios and Nagios plugins to many
 To install Nagios, simply run the following:
 
 ```
-curl -sSL https://raw.github.com/wojciechka/nagios-install/master/install.sh | sudo sh -
+curl -sSL https://raw.github.com/learning-nagios/nagios-install/master/install.sh | sudo sh -
 ```
