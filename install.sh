@@ -79,9 +79,11 @@ do_install() {
   fi
   # Determine web server username
   if [ -d /etc/apache2 ] ; then
-    USER_RESULT=`grep -rh '^ *User \|APACHE_RUN_USER=' /etc/apache2 | grep -v '^ *User .*APACHE_RUN_USER'`
+    HTTPD_FILES=`find /etc/apache2 -type f`
+    USER_RESULT=`grep -h '^ *User ' $HTTPD_FILES | grep -v '^ *User .*APACHE_RUN_USER'`
   elif [ -d /etc/httpd ] ; then
-    USER_RESULT=`grep -rh '^ *User ' /etc/httpd`
+    HTTPD_FILES=`find /etc/httpd -type f`
+    USER_RESULT=`grep -h '^ *User ' $HTTPD_FILES | grep -v '^ *User .*APACHE_RUN_USER'`
   else
     USER_RESULT=''
   fi
