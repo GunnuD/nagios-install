@@ -30,7 +30,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 do_install() {
-  NAGIOS_VERSION=4.1.1
+  NAGIOS_VERSION=4.6.1
   NAGIOS_PLUGINS_VERSION=2.1.1
 
   # needed for older Linux distributions such as Ubuntu 12 or Debian 7
